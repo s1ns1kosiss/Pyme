@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TipoCliente {
+  persona
+  empresa
+}
+
+enum PilarSesion {
+  asesoria
+  optimizacion
+  componentes
+}
+
+enum EstadoSesion {
+  agendada
+  en_curso
+  completada
+  cancelada
+}
+
+model Cliente {
+  id        String      @id @default(uuid())
+  nombre    String
+  tipo      TipoCliente
+  email     String      @unique
+  telefono  String?
+  createdAt DateTime    @default(now())
+  equipos   Equipo[]
+  sesiones  Sesion[]
+
+  @@map("clientes")
+}
+
+model Equipo {
+  id           String   @id @default(uuid())
+  clienteId    String   @map("cliente_id")
+  cliente      Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  tipoEquipo   String   @map("tipo_equipo")
+  usoPrincipal String?  @map("uso_principal")
+  createdAt    DateTime @default(now())
+  sesiones     Sesion[]
+
+  @@map("equipos")
+}
+
+model Sesion {
+  id          String       @id @default(uuid())
+  clienteId   String       @map("cliente_id")
+  cliente     Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  equipoId    String?      @map("equipo_id")
+  equipo      Equipo?      @relation(fields: [equipoId], references: [id])
+  pilar       PilarSesion
+  estado      EstadoSesion @default(agendada)
+  fecha       DateTime
+  planEscrito String?      @map("plan_escrito") @db.Text
+  createdAt   DateTime     @default(now())
+
+  @@map("sesiones")
+}

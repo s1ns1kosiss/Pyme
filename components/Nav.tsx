@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { brand, getWhatsAppUrl } from "@/lib/brand";
+import { brand } from "@/lib/brand";
+import BookingModal from "./BookingModal";
 
 export default function Nav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
 
   const navLinks = [
     { name: "Servicios", href: "#servicios" },
@@ -54,16 +56,14 @@ export default function Nav() {
           ))}
         </nav>
 
-        {/* Desktop WhatsApp Action Button */}
+        {/* Desktop Action Button */}
         <div className="hidden md:flex items-center gap-4">
-          <a
-            href={getWhatsAppUrl("Hola, me interesa agendar una consulta inicial.")}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-sans text-xs font-bold px-5 py-2.5 rounded-full bg-[var(--ink)] text-[var(--paper)] hover:bg-[var(--ink-soft)] hover:shadow-md transition-all flex items-center gap-2 border border-[var(--ink)]"
+          <button
+            onClick={() => setBookingModalOpen(true)}
+            className="font-sans text-xs font-bold px-5 py-2.5 rounded-full bg-[var(--ink)] text-[var(--paper)] hover:bg-[var(--ink-soft)] hover:shadow-md transition-all flex items-center gap-2 border border-[var(--ink)] cursor-pointer"
           >
-            <span>💬</span> Agendar Sesión
-          </a>
+            <span>🗓️</span> Agendar Sesión
+          </button>
         </div>
 
         {/* Mobile Menu Button */}
@@ -95,16 +95,22 @@ export default function Nav() {
               {link.name}
             </a>
           ))}
-          <a
-            href={getWhatsAppUrl("Hola, me interesa agendar una consulta inicial.")}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-sans text-sm font-bold w-full py-3 rounded-full bg-[var(--ink)] text-[var(--paper)] text-center shadow-sm flex items-center justify-center gap-2 mt-2"
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              setBookingModalOpen(true);
+            }}
+            className="font-sans text-sm font-bold w-full py-3 rounded-full bg-[var(--ink)] text-[var(--paper)] text-center shadow-sm flex items-center justify-center gap-2 mt-2 cursor-pointer"
           >
-            <span>💬</span> Agendar Sesión por WhatsApp
-          </a>
+            <span>🗓️</span> Agendar Sesión
+          </button>
         </div>
       )}
+
+      <BookingModal
+        isOpen={bookingModalOpen}
+        onClose={() => setBookingModalOpen(false)}
+      />
     </header>
   );
 }
