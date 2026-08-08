@@ -287,10 +287,26 @@ export default function BookingModal({
                 </div>
               </div>
 
-              {/* Status Banner */}
+              {/* Status Banner & Safety Net WhatsApp Fallback */}
               {status.type === "error" && (
-                <div className="p-3 rounded-xl bg-[#FFF7F5] border border-[var(--orange)] text-xs text-[var(--orange)] font-medium">
-                  ⚠️ {status.message}
+                <div className="p-4 rounded-xl bg-[#FFF7F5] border-2 border-[var(--orange)] flex flex-col gap-3">
+                  <div className="flex items-start gap-2.5">
+                    <span className="text-xl">⚠️</span>
+                    <div className="text-xs text-[var(--ink)] font-medium leading-relaxed">
+                      <strong>No pudimos registrar tu sesión automáticamente:</strong>
+                      <p className="text-[var(--ink-soft)] mt-0.5">{status.message}</p>
+                    </div>
+                  </div>
+                  <a
+                    href={getWhatsAppUrl(
+                      `Hola, intenté agendar en el sitio a nombre de ${formData.nombre || "cliente"} (${formData.email || "sin email"}) pero el sistema automático no respondió. Me gustaría agendar por acá.`
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full font-mono text-xs font-bold py-2.5 px-4 rounded-lg bg-[#25D366] text-white hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-center"
+                  >
+                    💬 Agendar directamente vía WhatsApp ahora
+                  </a>
                 </div>
               )}
 

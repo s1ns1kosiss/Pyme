@@ -40,20 +40,37 @@ export async function POST(request: Request) {
     if (pilar === "optimizacion") targetPilar = PilarSesion.optimizacion;
     if (pilar === "componentes") targetPilar = PilarSesion.componentes;
 
-    const sessionDate = fecha ? new Date(fecha) : new Date(Date.now() + 86400000); // Mañana por defecto
+    const sessionDate = fecha ? new Date(fecha) : new Date(Date.now() + 86400000);
 
-    // DB Connection Check fallback (if DATABASE_URL is not set or DB unreachable)
+    // CRITICAL SECURITY FIX: Demo mode is strictly restricted to non-production environments
+    const isProduction = process.env.NODE_ENV === "production";
+
     if (!process.env.DATABASE_URL) {
-      console.warn("DATABASE_URL no configurada. Simulando agendamiento exitoso.");
-      return NextResponse.json({
-        success: true,
-        demoMode: true,
-        message: "Agendamiento registrado correctamente (Modo Simulación / Sin DB real).",
-        data: {
-          cliente: { nombre, email, telefono, tipo: targetTipoCliente },
-          sesion: { pilar: targetPilar, fecha: sessionDate.toISOString() },
-        },
-      });
+      if (!isProduction) {
+        console.warn(
+          "⚠️ DEV ONLY: DATABASE_URL no configurada en entorno de desarrollo. Modo simulación activo."
+        );
+        return NextResponse.json({
+          success: true,
+          demoMode: true,
+          message: "Agendamiento registrado correctamente (Modo Simulación Dev).",
+          data: {
+            cliente: { nombre, email, telefono, tipo: targetTipoCliente },
+            sesion: { pilar: targetPilar, fecha: sessionDate.toISOString() },
+          },
+        });
+      } else {
+        // En producción, NUNCA responder éxito falso
+        console.error("❌ ERROR CRÍTICO PRODUCCIÓN: DATABASE_URL no configurada.");
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "El sistema de agenda remota no está disponible en este momento. Por favor utiliza nuestro contacto directo de WhatsApp.",
+          },
+          { status: 500 }
+        );
+      }
     }
 
     // Upsert Cliente
@@ -99,7 +116,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       demoMode: false,
-      message: "¡Sesión agendada exitosamente!",
+      message: "¡Sesión agendada exitosamente en la agenda!",
       data: {
         sesionId: sesion.id,
         clienteNombre: cliente.nombre,
@@ -108,14 +125,15 @@ export async function POST(request: Request) {
       },
     });
   } catch (error: unknown) {
-    console.error("Error al procesar el agendamiento:", error);
+    console.error("❌ Error al procesar el agendamiento:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Error interno del servidor";
 
     return NextResponse.json(
       {
         success: false,
-        error: "No se pudo guardar el agendamiento. Revisa la conexión a la base de datos.",
+        error:
+          "No se pudo guardar tu agendamiento en la base de datos. Por favor contáctanos directamente vía WhatsApp.",
         details: errorMessage,
       },
       { status: 500 }
