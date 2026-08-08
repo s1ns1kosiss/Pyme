@@ -19,7 +19,7 @@ export default function CaseStudy() {
             ¿Reemplazar GPU o ajustar la configuración?
           </h2>
           <p className="font-sans text-base sm:text-lg text-[var(--ink-soft)] leading-relaxed">
-            Un taller común sugirió cambiar la tarjeta gráfica por $380.000. Nuestro diagnóstico encontró la causa real por solo {brand.pricing.remoteSession.formattedPrice}.
+            Un taller común sugirió cambiar la tarjeta gráfica por un monto considerablemente mayor. Nuestro diagnóstico encontró la causa real por solo la tarifa de sesión ({brand.pricing.remoteSession.formattedPrice}).
           </p>
         </div>
 
