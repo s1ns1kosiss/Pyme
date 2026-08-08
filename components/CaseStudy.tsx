@@ -60,19 +60,19 @@ export default function CaseStudy() {
                   ⚠️ El Problema Inicial
                 </div>
                 <h3 className="font-serif font-bold text-2xl text-[var(--ink)]">
-                  Caídas drásticas de FPS y apagado por temperatura
+                  Caídas drásticas de rendimiento y sobrecalentamiento
                 </h3>
                 <p className="font-sans text-sm text-[var(--ink-soft)] leading-relaxed">
-                  El cliente sufría caídas de 144 FPS a 35 FPS en partidas competitivas. Un servicio técnico tradicional le recomendó reemplazar la tarjeta de video por $380.000 CLP.
+                  El equipo sufría congelamientos periódicos y caídas severas de fluidez en momentos de alta carga. Un servicio técnico tradicional sugirió cambiar componentes principales por un alto costo.
                 </p>
                 <div className="grid grid-cols-2 gap-4 font-mono text-xs pt-2">
                   <div className="p-3 rounded-lg bg-white border border-[var(--line)]">
                     <span className="block text-[var(--ink-soft)]">Temperatura CPU:</span>
-                    <span className="font-bold text-[var(--orange)] text-base">94°C (Thermal Throttling)</span>
+                    <span className="font-bold text-[var(--orange)] text-base">Crítica (Thermal Throttling)</span>
                   </div>
                   <div className="p-3 rounded-lg bg-white border border-[var(--line)]">
-                    <span className="block text-[var(--ink-soft)]">Presupuesto Sugerido Taller:</span>
-                    <span className="font-bold text-[var(--ink)] text-base">$380.000 CLP</span>
+                    <span className="block text-[var(--ink-soft)]">Diagnóstico Taller Común:</span>
+                    <span className="font-bold text-[var(--ink)] text-base">Reemplazo de pieza costosa</span>
                   </div>
                 </div>
               </div>
@@ -85,7 +85,7 @@ export default function CaseStudy() {
                   Zona Sobreinvertida
                 </span>
                 <p className="font-sans text-xs text-[var(--ink-soft)]">
-                  Gasto innecesario sugerido sin atacar la causa térmica del problema.
+                  Gasto innecesario sugerido sin atacar la causa real del problema de software y temperatura.
                 </p>
               </div>
             </div>
@@ -96,19 +96,19 @@ export default function CaseStudy() {
                   🎯 La Solución [MARCA]
                 </div>
                 <h3 className="font-serif font-bold text-2xl text-[var(--ink)]">
-                  Tuning de software + cambio de pasta térmica
+                  Tuning de software + mantención térmica
                 </h3>
                 <p className="font-sans text-sm text-[var(--ink-soft)] leading-relaxed">
-                  Identificamos que la GPU estaba intacta. El problema era la disipación del procesador y la memoria RAM mal configurada a velocidad base sin XMP.
+                  Identificamos que el hardware estaba intacto. El problema era la disipación del procesador y la memoria RAM descalibrada.
                 </p>
                 <div className="grid grid-cols-2 gap-4 font-mono text-xs pt-2">
                   <div className="p-3 rounded-lg bg-white border border-[var(--line)]">
                     <span className="block text-[var(--ink-soft)]">Temperatura Final:</span>
-                    <span className="font-bold text-[var(--blue)] text-base">68°C Estables</span>
+                    <span className="font-bold text-[var(--blue)] text-base">Rango Óptimo y Estable</span>
                   </div>
                   <div className="p-3 rounded-lg bg-white border border-[var(--line)]">
                     <span className="block text-[var(--ink-soft)]">Costo Total Servicio:</span>
-                    <span className="font-bold text-[var(--blue)] text-base">{brand.pricing.remoteSession.formattedPrice} CLP</span>
+                    <span className="font-bold text-[var(--blue)] text-base">Solo tarifa de sesión ({brand.pricing.remoteSession.formattedPrice})</span>
                   </div>
                 </div>
               </div>
@@ -118,10 +118,10 @@ export default function CaseStudy() {
                   🚀
                 </div>
                 <span className="font-mono text-xs font-bold text-[var(--blue)] uppercase">
-                  Ahorro Neto: $360.010 CLP
+                  Punto Óptimo Alcanzado
                 </span>
                 <p className="font-sans text-xs text-[var(--ink-soft)]">
-                  Recuperación completa de FPS sin necesidad de comprar piezas nuevas.
+                  Recuperación de la fluidez y estabilidad sin necesidad de comprar piezas nuevas.
                 </p>
               </div>
             </div>
