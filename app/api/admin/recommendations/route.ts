@@ -2,44 +2,55 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { EstadoRecomendacion } from "@prisma/client";
 
-// POST /api/admin/recommendations -> Agregar una recomendación a una sesión
+// POST /api/admin/recommendations -> Agregar una recomendación a una sesión usando un componente EXISTENTE
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const {
-      sesionId,
-      nombreComponente,
-      categoria = "Upgrade General",
-      precioReferencia,
-    } = body;
+    const { sesionId, componenteId } = body;
 
-    if (!sesionId || !nombreComponente) {
+    if (!sesionId || !componenteId) {
       return NextResponse.json(
-        { success: false, error: "sesionId y nombreComponente son obligatorios." },
+        {
+          success: false,
+          error: "Los campos 'sesionId' y 'componenteId' son obligatorios.",
+        },
         { status: 400 }
       );
     }
 
-    // Buscar o crear el componente
-    let componente = await prisma.componente.findFirst({
-      where: { nombre: nombreComponente.trim() },
+    // Validar que la sesión exista
+    const sesionExistente = await prisma.sesion.findUnique({
+      where: { id: sesionId },
     });
 
-    if (!componente) {
-      componente = await prisma.componente.create({
-        data: {
-          nombre: nombreComponente.trim(),
-          categoria: categoria.trim(),
-          precioReferencia: precioReferencia ? parseFloat(precioReferencia) : null,
-        },
-      });
+    if (!sesionExistente) {
+      return NextResponse.json(
+        { success: false, error: "La sesión especificada no existe." },
+        { status: 404 }
+      );
     }
 
-    // Crear recomendación vinculada
+    // Validar que el componente EXISTA en el catálogo
+    const componenteExistente = await prisma.componente.findUnique({
+      where: { id: componenteId },
+    });
+
+    if (!componenteExistente) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "El componente seleccionado no existe en el catálogo. Selecciona un componente existente.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Crear recomendación vinculando la sesión con el componente existente
     const recomendacion = await prisma.recomendacion.create({
       data: {
         sesionId,
-        componenteId: componente.id,
+        componenteId: componenteExistente.id,
         estado: EstadoRecomendacion.sugerido,
       },
       include: {
@@ -52,9 +63,9 @@ export async function POST(request: Request) {
       data: recomendacion,
     });
   } catch (error: unknown) {
-    console.error("Error al crear recomendación:", error);
+    console.error("Error al vincular recomendación:", error);
     return NextResponse.json(
-      { success: false, error: "Error interno al crear recomendación." },
+      { success: false, error: "Error interno al vincular la recomendación." },
       { status: 500 }
     );
   }
@@ -68,7 +79,7 @@ export async function PATCH(request: Request) {
 
     if (!id || !estado) {
       return NextResponse.json(
-        { success: false, error: "id y estado son obligatorios." },
+        { success: false, error: "Los campos 'id' y 'estado' son obligatorios." },
         { status: 400 }
       );
     }
@@ -83,7 +94,7 @@ export async function PATCH(request: Request) {
 
     if (!validStates.includes(estado as EstadoRecomendacion)) {
       return NextResponse.json(
-        { success: false, error: "Estado no válido." },
+        { success: false, error: "Estado de recomendación no válido." },
         { status: 400 }
       );
     }

@@ -47,17 +47,26 @@ interface Sesion {
 
 export default function AdminPage() {
   const [sessions, setSessions] = useState<Sesion[]>([]);
+  const [catalog, setCatalog] = useState<Componente[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // New recommendation inline state per session
-  const [newRecs, setNewRecs] = useState<{
-    [sesionId: string]: {
-      nombreComponente: string;
-      categoria: string;
-      precioReferencia: string;
-    };
+  // Selected componentId per session for inline recommendation dropdown
+  const [selectedCompPerSession, setSelectedCompPerSession] = useState<{
+    [sesionId: string]: string;
   }>({});
+
+  const fetchCatalog = async () => {
+    try {
+      const res = await fetch("/api/admin/components");
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setCatalog(data.data);
+      }
+    } catch {
+      console.error("Error al cargar catálogo de componentes.");
+    }
+  };
 
   const fetchSessions = async () => {
     try {
@@ -77,6 +86,7 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
+    fetchCatalog();
     fetchSessions();
   }, []);
 
@@ -92,7 +102,6 @@ export default function AdminPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        // Local state update
         setSessions((prev) =>
           prev.map((s) => ({
             ...s,
@@ -110,9 +119,9 @@ export default function AdminPage() {
   };
 
   const handleAddRecommendation = async (sesionId: string) => {
-    const recData = newRecs[sesionId];
-    if (!recData || !recData.nombreComponente.trim()) {
-      alert("Ingresa el nombre del componente.");
+    const componenteId = selectedCompPerSession[sesionId];
+    if (!componenteId) {
+      alert("Selecciona un componente del catálogo.");
       return;
     }
 
@@ -122,18 +131,15 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sesionId,
-          nombreComponente: recData.nombreComponente,
-          categoria: recData.categoria || "Upgrade General",
-          precioReferencia: recData.precioReferencia || null,
+          componenteId,
         }),
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
-        // Clear input state and refresh
-        setNewRecs((prev) => ({
+        setSelectedCompPerSession((prev) => ({
           ...prev,
-          [sesionId]: { nombreComponente: "", categoria: "", precioReferencia: "" },
+          [sesionId]: "",
         }));
         fetchSessions();
       } else {
@@ -176,15 +182,18 @@ export default function AdminPage() {
                 Panel Interno de Gestión — [{brand.name}]
               </h1>
               <p className="font-mono text-xs text-[var(--ink-soft)]">
-                Seguimiento de Sesiones, Diagnósticos y Estado de Componentes (Fase 3)
+                Seguimiento de Sesiones y Recomendación de Componentes del Catálogo
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <button
-              onClick={fetchSessions}
-              className="font-mono text-xs font-bold px-4 py-2 rounded-full bg-[var(--paper-2)] border border-[var(--line)] hover:bg-[var(--paper)] transition-colors flex items-center gap-1.5"
+              onClick={() => {
+                fetchCatalog();
+                fetchSessions();
+              }}
+              className="font-mono text-xs font-bold px-4 py-2 rounded-full bg-[var(--paper-2)] border border-[var(--line)] hover:bg-[var(--paper)] transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               🔄 Actualizar Datos
             </button>
@@ -219,11 +228,7 @@ export default function AdminPage() {
         ) : (
           <div className="flex flex-col gap-6">
             {sessions.map((session) => {
-              const currentRecState = newRecs[session.id] || {
-                nombreComponente: "",
-                categoria: "",
-                precioReferencia: "",
-              };
+              const currentSelectedComp = selectedCompPerSession[session.id] || "";
 
               return (
                 <div
@@ -280,16 +285,16 @@ export default function AdminPage() {
                   <div className="flex flex-col gap-4 pt-2">
                     <div className="flex items-center justify-between">
                       <h4 className="font-serif font-bold text-lg text-[var(--ink)] flex items-center gap-2">
-                        <span>📦</span> Recomendaciones de Componentes ({session.recomendaciones.length})
+                        <span>📦</span> Recomendaciones ({session.recomendaciones.length})
                       </h4>
                       <span className="font-mono text-[11px] text-[var(--ink-soft)]">
-                        Modelo: sugerido → cotizado → comprado → instalado
+                        Secuencia: sugerido → cotizado → comprado → instalado
                       </span>
                     </div>
 
                     {session.recomendaciones.length === 0 ? (
                       <p className="font-mono text-xs text-[var(--ink-soft)] italic bg-[var(--paper)] p-3 rounded-lg border border-[var(--line)]">
-                        Sin recomendaciones de repuestos agregadas a esta sesión. (Cliente no ha requerido upgrades).
+                        Sin componentes recomendados vinculados a esta sesión.
                       </p>
                     ) : (
                       <div className="grid grid-cols-1 gap-3">
@@ -303,7 +308,7 @@ export default function AdminPage() {
                                 <span className="font-sans font-bold text-sm text-[var(--ink)]">
                                   {rec.componente.nombre}
                                 </span>
-                                <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-[var(--paper-2)] text-[var(--ink-soft)] border border-[var(--line)]">
+                                <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-[var(--paper-2)] text-[var(--ink-soft)] border border-[var(--line)] font-semibold">
                                   {rec.componente.categoria}
                                 </span>
                               </div>
@@ -316,7 +321,11 @@ export default function AdminPage() {
 
                             {/* State Selector Buttons */}
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`font-mono text-xs font-bold px-3 py-1 rounded-full border uppercase ${getStatusBadge(rec.estado)}`}>
+                              <span
+                                className={`font-mono text-xs font-bold px-3 py-1 rounded-full border uppercase ${getStatusBadge(
+                                  rec.estado
+                                )}`}
+                              >
                                 {rec.estado}
                               </span>
 
@@ -325,15 +334,20 @@ export default function AdminPage() {
                                 onChange={(e) =>
                                   handleUpdateStatus(
                                     rec.id,
-                                    e.target.value as "sugerido" | "cotizado" | "comprado" | "instalado" | "descartado"
+                                    e.target.value as
+                                      | "sugerido"
+                                      | "cotizado"
+                                      | "comprado"
+                                      | "instalado"
+                                      | "descartado"
                                   )
                                 }
                                 className="font-mono text-xs font-bold px-3 py-1.5 rounded-lg bg-white border border-[var(--line)] text-[var(--ink)] focus:outline-none cursor-pointer hover:bg-[var(--paper-2)]"
                               >
                                 <option value="sugerido">sugerido (Recomendado)</option>
                                 <option value="cotizado">cotizado (Enlace enviado)</option>
-                                <option value="comprado">comprado (Por el cliente)</option>
-                                <option value="instalado">instalado (Servicio listo)</option>
+                                <option value="comprado">comprado (Por cliente)</option>
+                                <option value="instalado">instalado (Listo)</option>
                                 <option value="descartado">descartado</option>
                               </select>
                             </div>
@@ -342,47 +356,34 @@ export default function AdminPage() {
                       </div>
                     )}
 
-                    {/* Inline Form to Add Recommendation */}
+                    {/* Selector Form to Link Existing Catalog Component */}
                     <div className="mt-2 p-4 rounded-xl border border-[var(--line)] bg-[var(--paper-2)] flex flex-col gap-3">
                       <span className="font-mono text-xs font-bold text-[var(--ink)] uppercase">
-                        + Sugerir nuevo componente a esta sesión
+                        + Seleccionar componente existente del catálogo
                       </span>
                       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                        <input
-                          type="text"
-                          placeholder="Nombre componente (ej. SSD Crucial 1TB)"
-                          value={currentRecState.nombreComponente}
+                        <select
+                          value={currentSelectedComp}
                           onChange={(e) =>
-                            setNewRecs({
-                              ...newRecs,
-                              [session.id]: {
-                                ...currentRecState,
-                                nombreComponente: e.target.value,
-                              },
+                            setSelectedCompPerSession({
+                              ...selectedCompPerSession,
+                              [session.id]: e.target.value,
                             })
                           }
-                          className="sm:col-span-5 px-3 py-2 rounded-lg bg-white border border-[var(--line)] text-xs text-[var(--ink)] focus:outline-none"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Categoría (ej. Almacenamiento)"
-                          value={currentRecState.categoria}
-                          onChange={(e) =>
-                            setNewRecs({
-                              ...newRecs,
-                              [session.id]: {
-                                ...currentRecState,
-                                categoria: e.target.value,
-                              },
-                            })
-                          }
-                          className="sm:col-span-4 px-3 py-2 rounded-lg bg-white border border-[var(--line)] text-xs text-[var(--ink)] focus:outline-none"
-                        />
+                          className="sm:col-span-9 px-3 py-2 rounded-lg bg-white border border-[var(--line)] text-xs text-[var(--ink)] focus:outline-none cursor-pointer"
+                        >
+                          <option value="">-- Seleccionar componente del catálogo ({catalog.length} disponibles) --</option>
+                          {catalog.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              [{c.categoria}] {c.nombre} {c.precioReferencia ? `($${c.precioReferencia.toLocaleString("es-CL")})` : ""}
+                            </option>
+                          ))}
+                        </select>
                         <button
                           onClick={() => handleAddRecommendation(session.id)}
-                          className="sm:col-span-3 font-mono font-bold text-xs px-4 py-2 rounded-lg bg-[var(--blue)] text-white hover:bg-[var(--ink)] transition-colors"
+                          className="sm:col-span-3 font-mono font-bold text-xs px-4 py-2 rounded-lg bg-[var(--blue)] text-white hover:bg-[var(--ink)] transition-colors cursor-pointer"
                         >
-                          + Agregar
+                          + Recomendar
                         </button>
                       </div>
                     </div>
