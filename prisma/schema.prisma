@@ -25,6 +25,14 @@ enum EstadoSesion {
   cancelada
 }
 
+enum EstadoRecomendacion {
+  sugerido
+  cotizado
+  comprado
+  instalado
+  descartado
+}
+
 model Cliente {
   id        String      @id @default(uuid())
   nombre    String
@@ -51,16 +59,41 @@ model Equipo {
 }
 
 model Sesion {
-  id          String       @id @default(uuid())
-  clienteId   String       @map("cliente_id")
-  cliente     Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  equipoId    String?      @map("equipo_id")
-  equipo      Equipo?      @relation(fields: [equipoId], references: [id])
-  pilar       PilarSesion
-  estado      EstadoSesion @default(agendada)
-  fecha       DateTime
-  planEscrito String?      @map("plan_escrito") @db.Text
-  createdAt   DateTime     @default(now())
+  id              String          @id @default(uuid())
+  clienteId       String          @map("cliente_id")
+  cliente         Cliente         @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  equipoId        String?         @map("equipo_id")
+  equipo          Equipo?         @relation(fields: [equipoId], references: [id])
+  pilar           PilarSesion
+  estado          EstadoSesion    @default(agendada)
+  fecha           DateTime
+  planEscrito     String?         @map("plan_escrito") @db.Text
+  createdAt       DateTime        @default(now())
+  recomendaciones Recomendacion[]
 
   @@map("sesiones")
+}
+
+model Componente {
+  id               String          @id @default(uuid())
+  nombre           String
+  categoria        String
+  precioReferencia Decimal?        @map("precio_referencia") @db.Decimal(10, 2)
+  stock            Int             @default(0)
+  createdAt        DateTime        @default(now())
+  recomendaciones  Recomendacion[]
+
+  @@map("componentes")
+}
+
+model Recomendacion {
+  id           String              @id @default(uuid())
+  sesionId     String              @map("sesion_id")
+  sesion       Sesion              @relation(fields: [sesionId], references: [id], onDelete: Cascade)
+  componenteId String              @map("componente_id")
+  componente   Componente          @relation(fields: [componenteId], references: [id])
+  estado       EstadoRecomendacion @default(sugerido)
+  createdAt    DateTime            @default(now())
+
+  @@map("recomendaciones")
 }
