@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@neon/config": "^0.14.1",
+    "@neon/env": "^0.14.1",
     "@prisma/client": "^6.19.3",
     "next": "16.3.0",
     "react": "19.2.8",
