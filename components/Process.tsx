@@ -1,5 +1,3 @@
-import { brand } from "@/lib/brand";
-
 export default function Process() {
   const steps = [
     {
@@ -45,7 +43,7 @@ export default function Process() {
           {/* Connector Line (Desktop) */}
           <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-[var(--line)] -translate-y-6 z-0" />
 
-          {steps.map((step, idx) => (
+          {steps.map((step) => (
             <div
               key={step.num}
               className="relative z-10 bg-[var(--white)] rounded-2xl border-2 border-[var(--ink)] p-6 sm:p-8 shadow-[5px_5px_0px_0px_var(--ink)] flex flex-col gap-4 group hover:-translate-y-1 transition-transform"

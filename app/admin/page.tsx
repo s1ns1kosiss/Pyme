@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { brand } from "@/lib/brand";
 
 interface Componente {
@@ -197,12 +198,12 @@ export default function AdminPage() {
             >
               🔄 Actualizar Datos
             </button>
-            <a
+            <Link
               href="/"
               className="font-sans text-xs font-semibold px-4 py-2 rounded-full bg-[var(--ink)] text-white hover:bg-[var(--ink-soft)] transition-colors"
             >
               Ver Landing →
-            </a>
+            </Link>
           </div>
         </div>
 

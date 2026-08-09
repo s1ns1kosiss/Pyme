@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { brand, getWhatsAppUrl } from "@/lib/brand";
+import { brand } from "@/lib/brand";
 import BookingModal from "./BookingModal";
 
 export default function Pricing() {

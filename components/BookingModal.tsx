@@ -16,16 +16,20 @@ export default function BookingModal({
   initialPilar = "asesoria",
   initialTipo = "persona",
 }: BookingModalProps) {
-  const [formData, setFormData] = useState({
-    nombre: "",
-    email: "",
-    telefono: "",
-    tipoCliente: initialTipo,
-    pilar: initialPilar,
-    tipoEquipo: "",
-    usoPrincipal: "",
-    fecha: new Date(Date.now() + 86400000).toISOString().split("T")[0], // Mañana
-    planEscrito: "",
+  const [formData, setFormData] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return {
+      nombre: "",
+      email: "",
+      telefono: "",
+      tipoCliente: initialTipo,
+      pilar: initialPilar,
+      tipoEquipo: "",
+      usoPrincipal: "",
+      fecha: tomorrow.toISOString().split("T")[0],
+      planEscrito: "",
+    };
   });
 
   const [loading, setLoading] = useState(false);
